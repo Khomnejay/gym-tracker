@@ -2,84 +2,89 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workout Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite Workout Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; }
-        .card { background-color: #1e293b; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-        input { background: #334155; border: none; color: white; padding: 4px; border-radius: 4px; width: 60px; text-align: center; }
-        .tab-active { border-bottom: 3px solid #38bdf8; color: #38bdf8; }
+        body { background-color: #0f172a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .card { background-color: #1e293b; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid #334155; }
+        .set-input { background: #334155; border: 1px solid #475569; color: white; padding: 8px; border-radius: 8px; width: 100%; text-align: center; font-size: 14px; }
+        .set-input:focus { border-color: #38bdf8; outline: none; ring: 1px solid #38bdf8; }
+        .tab-active { border-bottom: 3px solid #38bdf8; color: #38bdf8; font-weight: 800; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="p-4 pb-20">
+<body class="p-4 pb-32">
 
     <header class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-2xl font-bold">Week <span id="weekNum">1</span></h1>
-            <p class="text-slate-400 text-sm" id="currentDayName"></p>
+            <h1 class="text-2xl font-black tracking-tight">WEEK <span id="weekNum">1</span></h1>
+            <p class="text-blue-400 font-medium text-sm uppercase tracking-wider" id="currentDayName"></p>
         </div>
-        <div class="text-right">
-            <span class="text-orange-500 font-bold text-xl">🔥 <span id="streakCount">0</span> Day Streak</span>
+        <div class="bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+            <span class="text-orange-500 font-bold">🔥 <span id="streakCount">0</span></span>
         </div>
     </header>
 
-    <div class="flex overflow-x-auto gap-4 mb-6 no-scrollbar text-sm font-semibold border-b border-slate-700">
-        <button onclick="switchDay(1)" id="tab1" class="pb-2 min-w-max">MON</button>
-        <button onclick="switchDay(2)" id="tab2" class="pb-2 min-w-max">TUE</button>
-        <button onclick="switchDay(3)" id="tab3" class="pb-2 min-w-max">WED</button>
-        <button onclick="switchDay(4)" id="tab4" class="pb-2 min-w-max">THU</button>
-        <button onclick="switchDay(5)" id="tab5" class="pb-2 min-w-max">FRI</button>
-        <button onclick="switchDay(6)" id="tab6" class="pb-2 min-w-max">SAT</button>
-        <button onclick="switchDay(0)" id="tab0" class="pb-2 min-w-max">SUN</button>
+    <div class="flex overflow-x-auto gap-6 mb-6 no-scrollbar text-xs font-bold border-b border-slate-800">
+        <button onclick="switchDay(1)" id="tab1" class="pb-3 min-w-max uppercase">Mon</button>
+        <button onclick="switchDay(2)" id="tab2" class="pb-3 min-w-max uppercase">Tue</button>
+        <button onclick="switchDay(3)" id="tab3" class="pb-3 min-w-max uppercase">Wed</button>
+        <button onclick="switchDay(4)" id="tab4" class="pb-3 min-w-max uppercase">Thu</button>
+        <button onclick="switchDay(5)" id="tab5" class="pb-3 min-w-max uppercase">Fri</button>
+        <button onclick="switchDay(6)" id="tab6" class="pb-3 min-w-max uppercase">Sat</button>
+        <button onclick="switchDay(0)" id="tab0" class="pb-3 min-w-max uppercase">Sun</button>
     </div>
 
-    <div id="workoutContent">
+    <div id="workoutContent" class="space-y-4">
         </div>
 
-    <button onclick="completeWorkout()" class="fixed bottom-6 left-4 right-4 bg-blue-600 py-4 rounded-xl font-bold text-lg shadow-lg">
-        Complete Session
-    </button>
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-slate-900/80 backdrop-blur-md border-t border-slate-800">
+        <button onclick="completeWorkout()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 transition-all py-4 rounded-2xl font-black text-white shadow-xl uppercase tracking-widest">
+            Complete Session
+        </button>
+    </div>
 
     <script>
+        // Data structure based strictly on your PDF
         const workoutData = {
             1: { name: "Back + Forearms", gym: [
-                {ex: "Deadlifts", sets: "4 (6,6,8,8)"}, {ex: "Bent-over Rows", sets: "4 (10,8,8,8)"}, 
-                {ex: "Lat Pulldown", sets: "4 (10-12)"}, {ex: "Dumbbell Row", sets: "3 (12,10,10)"},
-                {ex: "Face Pulls", sets: "3 (15)"}, {ex: "Hyperextension", sets: "2 (Failure)"},
-                {ex: "Wrist Curls", sets: "3 (15-20)"}, {ex: "Reverse Wrist Curls", sets: "3 (15-20)"}
+                {ex: "Deadlifts", sets: 4, reps: "6,6,8,8"}, {ex: "Bent-over Rows", sets: 4, reps: "10,8,8,8"}, 
+                {ex: "Lat Pulldown", sets: 4, reps: "10-12"}, {ex: "Dumbbell Row", sets: 3, reps: "12,10,10"},
+                {ex: "Face Pulls", sets: 3, reps: "15"}, {ex: "Hyperextension", sets: 2, reps: "Failure"},
+                {ex: "Wrist Curls", sets: 3, reps: "15-20"}, {ex: "Reverse Wrist Curls", sets: 3, reps: "15-20"}
             ]},
-            2: { name: "Chest, Biceps + Abs", gym: [
-                {ex: "Incline DB Press", sets: "4 (12,10,10,8)"}, {ex: "Bench Press", sets: "4 (10,8,8,6)"},
-                {ex: "Incline Flyes", sets: "3 (15,12,12)"}, {ex: "Cable Flyes", sets: "3 (15,12,12)"},
-                {ex: "Decline DB Press", sets: "3 (12,10,10)"}, {ex: "Barbell Curls", sets: "3 (10-12)"},
-                {ex: "Preacher Curls", sets: "3 (10-12)"}, {ex: "Hammer Curls", sets: "3 (10-12)"},
-                {ex: "Plank", sets: "3 (45-60s)"}, {ex: "Ab Wheel", sets: "3 (10-12)"}
-            ], run: "Tempo: 5m Easy + 20m Hard + 5m Cool"},
+            2: { name: "Chest, Biceps + Abs", run: "Tempo: 5m Easy + 20m Hard + 5m Cool", gym: [
+                {ex: "Incline DB Press", sets: 4, reps: "12,10,10,8"}, {ex: "Bench Press", sets: 4, reps: "10,8,8,6"},
+                {ex: "Incline Flyes", sets: 3, reps: "15,12,12"}, {ex: "Cable Flyes", sets: 3, reps: "15,12,12"},
+                {ex: "Decline DB Press", sets: 3, reps: "12,10,10"}, {ex: "Barbell Curls", sets: 3, reps: "10-12"},
+                {ex: "Preacher Curls", sets: 3, reps: "10-12"}, {ex: "Hammer Curls", sets: 3, reps: "10-12"},
+                {ex: "Plank", sets: 3, reps: "45-60s"}, {ex: "Ab Wheel", sets: 3, reps: "10-12"}
+            ]},
             3: { name: "Glutes, Ham + Abs", gym: [
-                {ex: "Romanian Deadlift", sets: "4 (10-12)"}, {ex: "Leg Curls", sets: "4 (12)"},
-                {ex: "Reverse Hack Squat", sets: "3 (15-20)"}, {ex: "Hip Thrusts", sets: "4 (12-15)"},
-                {ex: "Nordic Ham Curl", sets: "3 (8-10)"}, {ex: "Plank", sets: "3 (45-60s)"},
-                {ex: "Ab Wheel", sets: "3 (10-12)"}, {ex: "Hanging Leg Raises", sets: "3 (12-15)"}
+                {ex: "Romanian Deadlift", sets: 4, reps: "10-12"}, {ex: "Leg Curls", sets: 4, reps: "12 (Last Failure)"},
+                {ex: "Reverse Hack Squat", sets: 3, reps: "15-20"}, {ex: "Hip Thrusts", sets: 4, reps: "12-15"},
+                {ex: "Nordic Ham Curl", sets: 3, reps: "8-10"}, {ex: "Plank", sets: 3, reps: "45-60s"},
+                {ex: "Ab Wheel", sets: 3, reps: "10-12"}, {ex: "Hanging Leg Raises", sets: 3, reps: "12-15"}
             ]},
             4: { name: "Long Run + Abs", run: "45-60 min Conversational", gym: [
-                {ex: "Crunches", sets: "3 (20)"}, {ex: "Leg Raises", sets: "3 (15)"},
-                {ex: "Bicycle Crunches", sets: "3 (20)"}, {ex: "Plank", sets: "2 (60s)"}
+                {ex: "Crunches", sets: 3, reps: "20"}, {ex: "Leg Raises", sets: 3, reps: "15"},
+                {ex: "Bicycle Crunches", sets: 3, reps: "20/side"}, {ex: "Plank", sets: 2, reps: "60s"}
             ]},
-            5: { name: "Shoulders, Triceps + Forearms", gym: [
-                {ex: "DB Shoulder Press", sets: "4 (10-12)"}, {ex: "DB Lateral Raise", sets: "3 (15)"},
-                {ex: "Cable Raise", sets: "3 (15,12,12)"}, {ex: "Upright Rows", sets: "3 (12)"},
-                {ex: "Dips", sets: "4 (10-12)"}, {ex: "Skull Crushers", sets: "3 (12-15)"},
-                {ex: "Tricep Pushdown", sets: "3 (12,10,8)"}, {ex: "Farmer's Walk", sets: "3 (30s)"},
-                {ex: "Plate Pinch", sets: "3 (30s)"}
-            ], run: "Intervals: 5m Jog + 6x2m Hard (90s recovery)"},
+            5: { name: "Shoulders, Triceps + Forearms", run: "Intervals: 5m Jog + 6x2m Hard", gym: [
+                {ex: "DB Shoulder Press", sets: 4, reps: "10-12"}, {ex: "DB Lateral Raise", sets: 3, reps: "15"},
+                {ex: "Cable Raise", sets: 3, reps: "15,12,12"}, {ex: "Upright Rows", sets: 3, reps: "12"},
+                {ex: "Dips", sets: 4, reps: "10-12"}, {ex: "Skull Crushers", sets: 3, reps: "12-15"},
+                {ex: "Tricep Pushdown", sets: 3, reps: "12,10,8"}, {ex: "Farmer's Walk", sets: 3, reps: "30s"},
+                {ex: "Plate Pinch", sets: 3, reps: "30s"}
+            ]},
             6: { name: "Quads + Explosive", gym: [
-                {ex: "Box Jumps", sets: "3 (8)"}, {ex: "Back Squats", sets: "5 (5,5,6,8,10)"},
-                {ex: "Leg Press", sets: "4 (15,12,12,10)"}, {ex: "Leg Extension", sets: "3 (15)"},
-                {ex: "Walking Lunges", sets: "3 (12)"}, {ex: "Calf Raises", sets: "4 (12-15)"},
-                {ex: "Hip Adductors", sets: "3 (10-12)"}
+                {ex: "Box Jumps", sets: 3, reps: "8"}, {ex: "Back Squats", sets: 5, reps: "5,5,6,8,10"},
+                {ex: "Leg Press", sets: 4, reps: "15,12,12,10"}, {ex: "Leg Extension", sets: 3, reps: "15"},
+                {ex: "Walking Lunges", sets: 3, reps: "12/leg"}, {ex: "Calf Raises", sets: 4, reps: "12-15"},
+                {ex: "Hip Adductors", sets: 3, reps: "10-12"}
             ]},
-            0: { name: "Sunday Rest", gym: [{ex: "Foam Roll / Walk", sets: "20-30 min"}]}
+            0: { name: "Sunday Rest", gym: [{ex: "Foam Roll / Walk", sets: 1, reps: "20-30 min"}]}
         };
 
         let currentDay = new Date().getDay();
@@ -91,24 +96,42 @@
             const dayData = workoutData[currentDay];
             document.getElementById('currentDayName').innerText = dayData.name;
 
-            // Tabs
-            document.querySelectorAll('button[id^="tab"]').forEach(btn => btn.className = "pb-2 min-w-max text-slate-400");
-            document.getElementById('tab' + currentDay).className = "pb-2 min-w-max tab-active font-bold";
+            document.querySelectorAll('button[id^="tab"]').forEach(btn => btn.className = "pb-3 min-w-max uppercase text-slate-500");
+            document.getElementById('tab' + currentDay).className = "pb-3 min-w-max uppercase tab-active";
 
             let html = "";
-            if (dayData.run) html += `<div class="card border-l-4 border-green-500"><h3 class="font-bold text-green-400">🏃 RUNNING</h3><p>${dayData.run}</p></div>`;
+            if (dayData.run) {
+                html += `<div class="card border-l-4 border-emerald-500 bg-emerald-500/10">
+                            <h3 class="font-black text-emerald-400 text-xs uppercase mb-1">🏃 Running Session</h3>
+                            <p class="text-sm text-slate-200">${dayData.run}</p>
+                         </div>`;
+            }
             
-            dayData.gym.forEach((item, idx) => {
-                const val = state.logs[`w${state.week}d${currentDay}e${idx}`] || "";
+            dayData.gym.forEach((item, exIdx) => {
                 html += `
-                    <div class="card flex justify-between items-center">
-                        <div>
-                            <p class="font-bold">${item.ex}</p>
-                            <p class="text-xs text-slate-400">Sets: ${item.sets}</p>
+                    <div class="card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-bold text-lg leading-tight text-white">${item.ex}</h3>
+                                <p class="text-xs font-bold text-slate-500 uppercase">${item.sets} Sets • ${item.reps} Reps</p>
+                            </div>
                         </div>
-                        <div>
-                            <input type="number" placeholder="kg" value="${val}" 
-                                   onchange="saveLog(${idx}, this.value)" class="outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="grid grid-cols-4 gap-2">
+                            ${Array.from({length: item.sets}).map((_, setIdx) => {
+                                const logKey = `w${state.week}d${currentDay}e${exIdx}s${setIdx}`;
+                                const val = state.logs[logKey] || "";
+                                return `
+                                    <div class="text-center">
+                                        <span class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Set ${setIdx + 1}</span>
+                                        <input type="number" 
+                                               inputmode="decimal"
+                                               placeholder="--" 
+                                               value="${val}" 
+                                               onchange="saveLog('${logKey}', this.value)"
+                                               class="set-input">
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     </div>
                 `;
@@ -116,29 +139,24 @@
             document.getElementById('workoutContent').innerHTML = html;
         }
 
-        window.saveLog = (exIdx, val) => {
-            state.logs[`w${state.week}d${currentDay}e${idx}`] = val;
+        window.saveLog = (key, val) => {
+            state.logs[key] = val;
             localStorage.setItem('workoutState', JSON.stringify(state));
         };
 
-        window.switchDay = (day) => { currentDay = day; render(); };
+        window.switchDay = (day) => { currentDay = day; render(); window.scrollTo(0,0); };
 
         window.completeWorkout = () => {
             const today = new Date().toDateString();
             if (state.lastDate !== today) {
                 state.streak++;
                 state.lastDate = today;
-                
-                // If it's Sunday and completed, increment week
-                if (currentDay === 0) {
-                    state.week++;
-                }
-                
+                if (currentDay === 0) state.week++; // Advance week on Sunday
                 localStorage.setItem('workoutState', JSON.stringify(state));
-                alert("Progress Saved! Great job.");
+                alert("Session Complete! Streak Updated.");
                 render();
             } else {
-                alert("Already tracked today!");
+                alert("Session already logged for today!");
             }
         };
 
