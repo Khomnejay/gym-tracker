@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; }
+        .card { background-color: #1e293b; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        input { background: #334155; border: none; color: white; padding: 4px; border-radius: 4px; width: 60px; text-align: center; }
+        .tab-active { border-bottom: 3px solid #38bdf8; color: #38bdf8; }
+    </style>
+</head>
+<body class="p-4 pb-20">
+
+    <header class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold">Week <span id="weekNum">1</span></h1>
+            <p class="text-slate-400 text-sm" id="currentDayName"></p>
+        </div>
+        <div class="text-right">
+            <span class="text-orange-500 font-bold text-xl">🔥 <span id="streakCount">0</span> Day Streak</span>
+        </div>
+    </header>
+
+    <div class="flex overflow-x-auto gap-4 mb-6 no-scrollbar text-sm font-semibold border-b border-slate-700">
+        <button onclick="switchDay(1)" id="tab1" class="pb-2 min-w-max">MON</button>
+        <button onclick="switchDay(2)" id="tab2" class="pb-2 min-w-max">TUE</button>
+        <button onclick="switchDay(3)" id="tab3" class="pb-2 min-w-max">WED</button>
+        <button onclick="switchDay(4)" id="tab4" class="pb-2 min-w-max">THU</button>
+        <button onclick="switchDay(5)" id="tab5" class="pb-2 min-w-max">FRI</button>
+        <button onclick="switchDay(6)" id="tab6" class="pb-2 min-w-max">SAT</button>
+        <button onclick="switchDay(0)" id="tab0" class="pb-2 min-w-max">SUN</button>
+    </div>
+
+    <div id="workoutContent">
+        </div>
+
+    <button onclick="completeWorkout()" class="fixed bottom-6 left-4 right-4 bg-blue-600 py-4 rounded-xl font-bold text-lg shadow-lg">
+        Complete Session
+    </button>
+
+    <script>
+        const workoutData = {
+            1: { name: "Back + Forearms", gym: [
+                {ex: "Deadlifts", sets: "4 (6,6,8,8)"}, {ex: "Bent-over Rows", sets: "4 (10,8,8,8)"}, 
+                {ex: "Lat Pulldown", sets: "4 (10-12)"}, {ex: "Dumbbell Row", sets: "3 (12,10,10)"},
+                {ex: "Face Pulls", sets: "3 (15)"}, {ex: "Hyperextension", sets: "2 (Failure)"},
+                {ex: "Wrist Curls", sets: "3 (15-20)"}, {ex: "Reverse Wrist Curls", sets: "3 (15-20)"}
+            ]},
+            2: { name: "Chest, Biceps + Abs", gym: [
+                {ex: "Incline DB Press", sets: "4 (12,10,10,8)"}, {ex: "Bench Press", sets: "4 (10,8,8,6)"},
+                {ex: "Incline Flyes", sets: "3 (15,12,12)"}, {ex: "Cable Flyes", sets: "3 (15,12,12)"},
+                {ex: "Decline DB Press", sets: "3 (12,10,10)"}, {ex: "Barbell Curls", sets: "3 (10-12)"},
+                {ex: "Preacher Curls", sets: "3 (10-12)"}, {ex: "Hammer Curls", sets: "3 (10-12)"},
+                {ex: "Plank", sets: "3 (45-60s)"}, {ex: "Ab Wheel", sets: "3 (10-12)"}
+            ], run: "Tempo: 5m Easy + 20m Hard + 5m Cool"},
+            3: { name: "Glutes, Ham + Abs", gym: [
+                {ex: "Romanian Deadlift", sets: "4 (10-12)"}, {ex: "Leg Curls", sets: "4 (12)"},
+                {ex: "Reverse Hack Squat", sets: "3 (15-20)"}, {ex: "Hip Thrusts", sets: "4 (12-15)"},
+                {ex: "Nordic Ham Curl", sets: "3 (8-10)"}, {ex: "Plank", sets: "3 (45-60s)"},
+                {ex: "Ab Wheel", sets: "3 (10-12)"}, {ex: "Hanging Leg Raises", sets: "3 (12-15)"}
+            ]},
+            4: { name: "Long Run + Abs", run: "45-60 min Conversational", gym: [
+                {ex: "Crunches", sets: "3 (20)"}, {ex: "Leg Raises", sets: "3 (15)"},
+                {ex: "Bicycle Crunches", sets: "3 (20)"}, {ex: "Plank", sets: "2 (60s)"}
+            ]},
+            5: { name: "Shoulders, Triceps + Forearms", gym: [
+                {ex: "DB Shoulder Press", sets: "4 (10-12)"}, {ex: "DB Lateral Raise", sets: "3 (15)"},
+                {ex: "Cable Raise", sets: "3 (15,12,12)"}, {ex: "Upright Rows", sets: "3 (12)"},
+                {ex: "Dips", sets: "4 (10-12)"}, {ex: "Skull Crushers", sets: "3 (12-15)"},
+                {ex: "Tricep Pushdown", sets: "3 (12,10,8)"}, {ex: "Farmer's Walk", sets: "3 (30s)"},
+                {ex: "Plate Pinch", sets: "3 (30s)"}
+            ], run: "Intervals: 5m Jog + 6x2m Hard (90s recovery)"},
+            6: { name: "Quads + Explosive", gym: [
+                {ex: "Box Jumps", sets: "3 (8)"}, {ex: "Back Squats", sets: "5 (5,5,6,8,10)"},
+                {ex: "Leg Press", sets: "4 (15,12,12,10)"}, {ex: "Leg Extension", sets: "3 (15)"},
+                {ex: "Walking Lunges", sets: "3 (12)"}, {ex: "Calf Raises", sets: "4 (12-15)"},
+                {ex: "Hip Adductors", sets: "3 (10-12)"}
+            ]},
+            0: { name: "Sunday Rest", gym: [{ex: "Foam Roll / Walk", sets: "20-30 min"}]}
+        };
+
+        let currentDay = new Date().getDay();
+        let state = JSON.parse(localStorage.getItem('workoutState')) || { week: 1, streak: 0, lastDate: null, logs: {} };
+
+        function render() {
+            document.getElementById('weekNum').innerText = state.week;
+            document.getElementById('streakCount').innerText = state.streak;
+            const dayData = workoutData[currentDay];
+            document.getElementById('currentDayName').innerText = dayData.name;
+
+            // Tabs
+            document.querySelectorAll('button[id^="tab"]').forEach(btn => btn.className = "pb-2 min-w-max text-slate-400");
+            document.getElementById('tab' + currentDay).className = "pb-2 min-w-max tab-active font-bold";
+
+            let html = "";
+            if (dayData.run) html += `<div class="card border-l-4 border-green-500"><h3 class="font-bold text-green-400">🏃 RUNNING</h3><p>${dayData.run}</p></div>`;
+            
+            dayData.gym.forEach((item, idx) => {
+                const val = state.logs[`w${state.week}d${currentDay}e${idx}`] || "";
+                html += `
+                    <div class="card flex justify-between items-center">
+                        <div>
+                            <p class="font-bold">${item.ex}</p>
+                            <p class="text-xs text-slate-400">Sets: ${item.sets}</p>
+                        </div>
+                        <div>
+                            <input type="number" placeholder="kg" value="${val}" 
+                                   onchange="saveLog(${idx}, this.value)" class="outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('workoutContent').innerHTML = html;
+        }
+
+        window.saveLog = (exIdx, val) => {
+            state.logs[`w${state.week}d${currentDay}e${idx}`] = val;
+            localStorage.setItem('workoutState', JSON.stringify(state));
+        };
+
+        window.switchDay = (day) => { currentDay = day; render(); };
+
+        window.completeWorkout = () => {
+            const today = new Date().toDateString();
+            if (state.lastDate !== today) {
+                state.streak++;
+                state.lastDate = today;
+                
+                // If it's Sunday and completed, increment week
+                if (currentDay === 0) {
+                    state.week++;
+                }
+                
+                localStorage.setItem('workoutState', JSON.stringify(state));
+                alert("Progress Saved! Great job.");
+                render();
+            } else {
+                alert("Already tracked today!");
+            }
+        };
+
+        render();
+    </script>
+</body>
+</html>
