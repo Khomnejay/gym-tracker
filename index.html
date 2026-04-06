@@ -36,8 +36,7 @@
         <button onclick="switchDay(0)" id="tab0" class="pb-3 min-w-max uppercase">Sun</button>
     </div>
 
-    <div id="workoutContent" class="space-y-4">
-        </div>
+    <div id="workoutContent" class="space-y-4"></div>
 
     <div class="fixed bottom-0 left-0 right-0 p-4 bg-slate-900/80 backdrop-blur-md border-t border-slate-800">
         <button onclick="completeWorkout()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 transition-all py-4 rounded-2xl font-black text-white shadow-xl uppercase tracking-widest">
@@ -46,18 +45,17 @@
     </div>
 
     <script>
-        // Data structure based strictly on your PDF
         const workoutData = {
             1: { name: "Back + Forearms", gym: [
                 {ex: "Deadlifts", sets: 4, reps: "6,6,8,8"}, {ex: "Bent-over Rows", sets: 4, reps: "10,8,8,8"}, 
                 {ex: "Lat Pulldown", sets: 4, reps: "10-12"}, {ex: "Dumbbell Row", sets: 3, reps: "12,10,10"},
-                {ex: "Face Pulls", sets: 3, reps: "15"}, {ex: "Hyperextension", sets: 2, reps: "Failure"},
+                {ex: "T-Bar Rowing", sets: 3, reps: "12, 10, 10"}, {ex: "Hyperextension", sets: 2, reps: "Failure"},
                 {ex: "Wrist Curls", sets: 3, reps: "15-20"}, {ex: "Reverse Wrist Curls", sets: 3, reps: "15-20"}
             ]},
             2: { name: "Chest, Biceps + Abs", run: "Tempo: 5m Easy + 20m Hard + 5m Cool", gym: [
                 {ex: "Incline DB Press", sets: 4, reps: "12,10,10,8"}, {ex: "Bench Press", sets: 4, reps: "10,8,8,6"},
                 {ex: "Incline Flyes", sets: 3, reps: "15,12,12"}, {ex: "Cable Flyes", sets: 3, reps: "15,12,12"},
-                {ex: "Decline DB Press", sets: 3, reps: "12,10,10"}, {ex: "Barbell Curls", sets: 3, reps: "10-12"},
+                {ex: "Decline DB Press", sets: 3, reps: "12,10,10"}, {ex: "Incline DB Curls", sets: 3, reps: "10-12"},
                 {ex: "Preacher Curls", sets: 3, reps: "10-12"}, {ex: "Hammer Curls", sets: 3, reps: "10-12"},
                 {ex: "Plank", sets: 3, reps: "45-60s"}, {ex: "Ab Wheel", sets: 3, reps: "10-12"}
             ]},
@@ -73,10 +71,10 @@
             ]},
             5: { name: "Shoulders, Triceps + Forearms", run: "Intervals: 5m Jog + 6x2m Hard", gym: [
                 {ex: "DB Shoulder Press", sets: 4, reps: "10-12"}, {ex: "DB Lateral Raise", sets: 3, reps: "15"},
-                {ex: "Cable Raise", sets: 3, reps: "15,12,12"}, {ex: "Upright Rows", sets: 3, reps: "12"},
-                {ex: "Dips", sets: 4, reps: "10-12"}, {ex: "Skull Crushers", sets: 3, reps: "12-15"},
-                {ex: "Tricep Pushdown", sets: 3, reps: "12,10,8"}, {ex: "Farmer's Walk", sets: 3, reps: "30s"},
-                {ex: "Plate Pinch", sets: 3, reps: "30s"}
+                {ex: "Single Arm Cable Raise", sets: 3, reps: "15,12,12"}, {ex: "Rear Delt Fly (Cable/DB)", sets: 3, reps: "15"},
+                {ex: "Upright Rows", sets: 3, reps: "12"}, {ex: "Dips", sets: 4, reps: "10-12"}, 
+                {ex: "Skull Crushers", sets: 3, reps: "12-15"}, {ex: "Tricep Pushdown", sets: 3, reps: "12,10,8"}, 
+                {ex: "Farmer's Walk", sets: 3, reps: "30s"}, {ex: "Plate Pinch", sets: 3, reps: "30s"}
             ]},
             6: { name: "Quads + Explosive", gym: [
                 {ex: "Box Jumps", sets: 3, reps: "8"}, {ex: "Back Squats", sets: 5, reps: "5,5,6,8,10"},
@@ -101,65 +99,32 @@
 
             let html = "";
             if (dayData.run) {
-                html += `<div class="card border-l-4 border-emerald-500 bg-emerald-500/10">
-                            <h3 class="font-black text-emerald-400 text-xs uppercase mb-1">🏃 Running Session</h3>
-                            <p class="text-sm text-slate-200">${dayData.run}</p>
-                         </div>`;
+                html += `<div class="card border-l-4 border-emerald-500 bg-emerald-500/10"><h3 class="font-black text-emerald-400 text-xs uppercase mb-1">🏃 Running Session</h3><p class="text-sm text-slate-200">${dayData.run}</p></div>`;
             }
             
             dayData.gym.forEach((item, exIdx) => {
-                html += `
-                    <div class="card">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-bold text-lg leading-tight text-white">${item.ex}</h3>
-                                <p class="text-xs font-bold text-slate-500 uppercase">${item.sets} Sets • ${item.reps} Reps</p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-4 gap-2">
-                            ${Array.from({length: item.sets}).map((_, setIdx) => {
-                                const logKey = `w${state.week}d${currentDay}e${exIdx}s${setIdx}`;
-                                const val = state.logs[logKey] || "";
-                                return `
-                                    <div class="text-center">
-                                        <span class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Set ${setIdx + 1}</span>
-                                        <input type="number" 
-                                               inputmode="decimal"
-                                               placeholder="--" 
-                                               value="${val}" 
-                                               onchange="saveLog('${logKey}', this.value)"
-                                               class="set-input">
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
+                html += `<div class="card"><div class="mb-4"><div><h3 class="font-bold text-lg text-white">${item.ex}</h3><p class="text-xs font-bold text-slate-500 uppercase">${item.sets} Sets • ${item.reps} Reps</p></div></div><div class="grid grid-cols-4 gap-2">${Array.from({length: item.sets}).map((_, setIdx) => {
+                    const logKey = `w${state.week}d${currentDay}e${exIdx}s${setIdx}`;
+                    const val = state.logs[logKey] || "";
+                    return `<div class="text-center"><span class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Set ${setIdx+1}</span><input type="number" inputmode="decimal" placeholder="--" value="${val}" onchange="saveLog('${logKey}', this.value)" class="set-input"></div>`;
+                }).join('')}</div></div>`;
             });
             document.getElementById('workoutContent').innerHTML = html;
         }
 
-        window.saveLog = (key, val) => {
-            state.logs[key] = val;
-            localStorage.setItem('workoutState', JSON.stringify(state));
-        };
-
+        window.saveLog = (key, val) => { state.logs[key] = val; localStorage.setItem('workoutState', JSON.stringify(state)); };
         window.switchDay = (day) => { currentDay = day; render(); window.scrollTo(0,0); };
-
         window.completeWorkout = () => {
             const today = new Date().toDateString();
             if (state.lastDate !== today) {
                 state.streak++;
                 state.lastDate = today;
-                if (currentDay === 0) state.week++; // Advance week on Sunday
+                if (currentDay === 0) state.week++;
                 localStorage.setItem('workoutState', JSON.stringify(state));
-                alert("Session Complete! Streak Updated.");
+                alert("Session Saved!");
                 render();
-            } else {
-                alert("Session already logged for today!");
-            }
+            } else { alert("Already logged today!"); }
         };
-
         render();
     </script>
 </body>
